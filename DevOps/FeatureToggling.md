@@ -61,4 +61,30 @@ and your code may look like this:
         hideWelcomeScreen();
     }
 ```
+It is quite clear that using DateTime.now() can be restrictive when trying to test you code. There a couple of approaches you can take:
+1) Your test environments can have `feature.X.enabled` configured to different/sooner dates than production (which is a clunky solution)
+2) You can create a DateTime provider solution which lets you mimic `DateTime.now()` in a configurable way (see below)
 
+Testing date based feature toggles
+-------------
+
+To test date based feature toggles, you applications, or services can use a persistance layer in development mode only, be it a database table, or a distributed memory cache e.g.
+
+```
+/** calling .now() on this component will either return the time set on the environment in the database
+  *  or cache of the test environment, or will return DateTime.now() in production mode or when the cache
+  *  is empty
+  */ 
+  
+@Inject()
+private CustomDateTimeProvider dateTimeProvider;
+
+public void showXOrY() {
+    if(LocalDateTime.parse(featureXEnabled).isAfter(dateTimeProvider.now())) {
+        showX();
+    } else {
+        showY();
+    }
+}
+
+```
